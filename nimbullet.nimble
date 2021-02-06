@@ -10,3 +10,6 @@ srcDir        = "src"
 # Dependencies
 
 requires "nim >= 1.4.0"
+
+after install:
+  exec("nim c -r nimbullet/src/build.nim")

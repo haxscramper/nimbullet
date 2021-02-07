@@ -25,9 +25,6 @@ let parseConf = baseCppParseConfig.withIt do:
     if inList:
       it.includepaths.add AbsDir(realpath line[1..^1])
 
-  echo it.includepaths
-
-
   it.includepaths.add @[
     srcd.dir() / "SourcetrailDB/core/include",
     srcd.dir() / "SourcetrailDB/external/cpp_sqlite/include"
@@ -64,6 +61,7 @@ let wrapConf = baseWrapConf.withDeepIt do:
 
 
 proc doWrap(infile, outfile: FsFile) =
+  echo infile, " -> ", outfile
   writeWrapped(
     wrapSingleFile(
       infile,
@@ -71,8 +69,16 @@ proc doWrap(infile, outfile: FsFile) =
       wrapConf = wrapConf,
       parseConf = parseConf
     ),
-    outfile,
-    some AbsDir("/tmp"),
-    @[],
-    wrapConf
+    outFile = outfile,
+    codegens = none(FsDir),
+    compile = @[],
+    wrapConf = wrapConf
   )
+
+var cnt = 0
+
+for file in walkDir(RelDir("../bullet3/src"), RelFile, exts = @["h"]):
+  inc cnt
+  # doWrap(file, cwd() / file.withExt("nim"))
+  if cnt > 10:
+    break

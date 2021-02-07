@@ -1,6 +1,6 @@
 import hcparse, hcparse/[libclang]
 import std/[options]
-import hmisc/other/[oswrap, hshell]
+import hmisc/other/[oswrap, hshell, colorlogger]
 import hmisc/helpers
 import cxxstd
 
@@ -25,10 +25,7 @@ let parseConf = baseCppParseConfig.withIt do:
     if inList:
       it.includepaths.add AbsDir(realpath line[1..^1])
 
-  it.includepaths.add @[
-    srcd.dir() / "SourcetrailDB/core/include",
-    srcd.dir() / "SourcetrailDB/external/cpp_sqlite/include"
-  ]
+  it.includepaths.add @[cwd() / "../bullet3/src"]
 
   it.globalFlags = @["-xc++"]
 
@@ -77,8 +74,15 @@ proc doWrap(infile, outfile: FsFile) =
 
 var cnt = 0
 
-for file in walkDir(RelDir("../bullet3/src"), RelFile, exts = @["h"]):
+const inDir = RelDir("../bullet3/src")
+
+startColorLogger()
+startHax()
+
+for file in walkDir(inDir, RelFile, exts = @["h"]):
   inc cnt
-  # doWrap(file, cwd() / file.withExt("nim"))
-  if cnt > 10:
+  doWrap(inDir / file, cwd() / file.withExt("nim"))
+  if cnt > 3:
     break
+
+info "Done test wrapper"

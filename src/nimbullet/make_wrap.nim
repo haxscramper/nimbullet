@@ -29,8 +29,10 @@ let parseConf = baseCppParseConfig.withIt do:
 
   it.globalFlags = @["-xc++"]
 
+const inDir = RelDir("../bullet3/src")
 
 let wrapConf = baseWrapConf.withDeepIt do:
+  it.baseDir = toAbsDir(inDir)
   it.parseConf = parseConf
 
   it.makeHeader = (
@@ -74,15 +76,20 @@ proc doWrap(infile, outfile: FsFile) =
 
 var cnt = 0
 
-const inDir = RelDir("../bullet3/src")
 
 startColorLogger()
 startHax()
 
-for file in walkDir(inDir, RelFile, exts = @["h"]):
+for file in walkDir(inDir, RelFile, exts = @["h"], recurse = true):
+  info file, cnt
   inc cnt
   doWrap(inDir / file, cwd() / file.withExt("nim"))
-  if cnt > 3:
+  if cnt > 5:
     break
 
 info "Done test wrapper"
+
+doWrap(
+  AbsFile("/tmp/example.cpp"),
+  AbsFile("/tmp/example.nim")
+)
